@@ -1,10 +1,15 @@
 
+import 'package:akjol/firebase_options.dart';
 import 'package:akjol/widgets/buttom_navigator.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 final scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
-void main()  {
-
+void main() async {
+ WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
