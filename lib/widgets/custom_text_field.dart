@@ -13,6 +13,7 @@ class CustomTextField extends StatelessWidget {
     this.radius = 8,
     this.suffix,
     this.maxLines = 1,
+    this.minLines = 1,
     this.borderColor,
   });
   final Function(String)? onChanged;
@@ -22,12 +23,14 @@ class CustomTextField extends StatelessWidget {
   final Widget? suffix;
   final double radius;
   final int maxLines;
+  final int minLines;
   final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       maxLines: maxLines,
+      minLines: minLines,
       style: AppTextStyles.s15W600(
         color: AppColors.color4CADEABlue,
       ),

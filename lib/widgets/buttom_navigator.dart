@@ -1,5 +1,5 @@
 import 'package:akjol/features/home/home_screen.dart';
-import 'package:akjol/features/profile/home_screen.dart';
+import 'package:akjol/features/profile/profile_screen.dart';
 import 'package:akjol/helpers/app_colors.dart';
 import 'package:flutter/material.dart';
 
