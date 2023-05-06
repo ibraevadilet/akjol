@@ -1,3 +1,4 @@
+import 'package:akjol/core/save_person_data.dart';
 import 'package:akjol/features/authorization/screens/signup_screen.dart';
 import 'package:akjol/features/authorization/widget/logo.dart';
 import 'package:akjol/features/authorization/widget/text_filed.dart';
@@ -62,7 +63,7 @@ class _AuthorizationScreenState extends State<AuthorizationScreen> {
                     height: 20,
                   ),
                   textField('Введите пароль', Icons.lock_outlined, true,
-                            _passwordController),
+                      _passwordController),
                   SizedBox(
                     height: 20,
                   ),
@@ -81,9 +82,11 @@ class _AuthorizationScreenState extends State<AuthorizationScreen> {
                       GestureDetector(
                           onTap: () {
                             Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => SignUpScreen()));
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SignUpScreen(),
+                              ),
+                            );
                           },
                           child: Text(
                             'Зарегистрироваться',
@@ -111,13 +114,13 @@ class _AuthorizationScreenState extends State<AuthorizationScreen> {
         duration: Duration(milliseconds: 800),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-              primary: Colors.blue,
+              backgroundColor: Colors.blue,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(
                   isKeyboar ? 190 : 30,
                 ),
               )),
-          onPressed: () {
+          onPressed: () async {
             if (_emailController.text.isEmpty ||
                 _passwordController.text.isEmpty) {
               showErrorSnackBar('Поле не должно быть пустным');
@@ -128,28 +131,29 @@ class _AuthorizationScreenState extends State<AuthorizationScreen> {
                 setState(() {
                   _isLoading = true;
                 });
-                FirebaseAuth.instance
-                    .signInWithEmailAndPassword(
-                        email: _emailController.text,
-                        password: _passwordController.text)
-                    .then((value) => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                BottomNavigatorScreen())).onError(
-                        (error, stackTrace) => print('${error.toString()}')));
+                await FirebaseAuth.instance.signInWithEmailAndPassword(
+                    email: _emailController.text,
+                    password: _passwordController.text);
                 setState(() {
                   _isLoading = false;
                 });
+                await SavePersonData.setUserId();
+                await SavePersonData.setEmail(_emailController.text);
                 showSuccessSnackBar('Добро пожаловать');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BottomNavigatorScreen(),
+                  ),
+                );
               } on FirebaseAuthException catch (e) {
                 setState(() {
                   _isLoading = false;
                 });
                 if (e.code == 'user-not-found') {
-                  showErrorSnackBar('Не верный email ${e.code}');
+                  showErrorSnackBar('Не верный email');
                 } else if (e.code == 'wrong-password') {
-                  showErrorSnackBar('Не верный пароль ${e.code}');
+                  showErrorSnackBar('Не верный пароль');
                 }
               }
             }

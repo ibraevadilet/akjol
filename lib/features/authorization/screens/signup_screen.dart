@@ -1,3 +1,4 @@
+import 'package:akjol/core/save_person_data.dart';
 import 'package:akjol/features/authorization/widget/text_filed.dart';
 import 'package:akjol/widgets/buttom_navigator.dart';
 import 'package:akjol/widgets/spaces.dart';
@@ -91,13 +92,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
         duration: Duration(milliseconds: 800),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-              primary: Colors.blue,
+              backgroundColor: Colors.blue,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(
                   isKeyboar ? 190 : 30,
                 ),
               )),
-          onPressed: () {
+          onPressed: () async {
             if (_userNameController.text.isEmpty ||
                 _emailController.text.isEmpty ||
                 _passwordController.text.isEmpty) {
@@ -105,16 +106,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
             } else if (_passwordController.text.length < 6) {
               showErrorSnackBar('Пароль должен содержать минимум 6 символов');
             } else {
-              FirebaseAuth.instance
-                  .createUserWithEmailAndPassword(
-                      email: _emailController.text,
-                      password: _passwordController.text)
-                  .then((value) => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => BottomNavigatorScreen()))
-                      .onError(
-                          (error, stackTrace) => print('${error.toString()}')));
+              await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                email: _emailController.text,
+                password: _passwordController.text,
+              );
+              await SavePersonData.setName(_userNameController.text);
+              await SavePersonData.setEmail(_emailController.text);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BottomNavigatorScreen(),
+                ),
+              );
               showSuccessSnackBar('Вы успешно зарегистрировались!');
             }
           },

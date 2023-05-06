@@ -1,3 +1,4 @@
+import 'package:akjol/core/save_person_data.dart';
 import 'package:akjol/features/home/cubits/plases_cubit/plases_cubit.dart';
 import 'package:akjol/features/home/plase_repo.dart/plase_repo.dart';
 import 'package:akjol/features/home/widgets/get_local_positin.dart';
@@ -79,26 +80,38 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Positioned(
               bottom: 12,
-              child: Builder(builder: (context) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: CustomButton(
-                    text: 'Добавить адрес',
-                    width: getWidth(context) - 32,
-                    onPressed: () async {
-                      final placeLocale = await getLocalPositin();
-                      await showAddAdressDialog(
-                        context,
-                        placeLocale.latitude.toString(),
-                        placeLocale.longitude.toString(),
-                        () {
-                          context.read<PlasesCubit>().getPlase();
-                        },
+              child: FutureBuilder(
+                future: SavePersonData.getRole(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    if (snapshot.data! == 'Админ') {
+                      return SizedBox();
+                    }
+                  }
+                  return Builder(
+                    builder: (context) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: CustomButton(
+                          text: 'Добавить адрес',
+                          width: getWidth(context) - 32,
+                          onPressed: () async {
+                            final placeLocale = await getLocalPositin();
+                            await showAddAdressDialog(
+                              context,
+                              placeLocale.latitude.toString(),
+                              placeLocale.longitude.toString(),
+                              () {
+                                context.read<PlasesCubit>().getPlase();
+                              },
+                            );
+                          },
+                        ),
                       );
                     },
-                  ),
-                );
-              }),
+                  );
+                },
+              ),
             ),
           ],
         ),

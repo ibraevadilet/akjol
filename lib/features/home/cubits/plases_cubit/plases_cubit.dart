@@ -30,7 +30,10 @@ class PlasesCubit extends Cubit<PlasesState> {
     try {
       final uId = await SavePersonData.getUserId();
       final plases = await repo.getMyPlase();
-      plases.removeWhere((e) => e.userId != uId);
+      final role = await SavePersonData.getRole();
+      if (role == 'Граждан') {
+        plases.removeWhere((e) => e.userId != uId);
+      }
 
       emit(PlasesState.success2(plases));
     } catch (e) {
