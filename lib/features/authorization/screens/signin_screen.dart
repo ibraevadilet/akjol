@@ -2,6 +2,8 @@ import 'package:akjol/features/authorization/screens/signup_screen.dart';
 import 'package:akjol/features/authorization/widget/logo.dart';
 import 'package:akjol/features/authorization/widget/text_filed.dart';
 import 'package:akjol/widgets/buttom_navigator.dart';
+import 'package:akjol/widgets/spaces.dart';
+import 'package:akjol/widgets/styled_toasts.dart';
 import 'package:animate_gradient/animate_gradient.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -16,9 +18,19 @@ class AuthorizationScreen extends StatefulWidget {
 class _AuthorizationScreenState extends State<AuthorizationScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isKeyboar = MediaQuery.of(context).viewInsets.bottom != 0;
+    bool _isLoading = false;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: AnimateGradient(
@@ -44,13 +56,13 @@ class _AuthorizationScreenState extends State<AuthorizationScreen> {
                   SizedBox(
                     height: 30,
                   ),
-                  textField(
-                      'Введите емайл', Icons.person_outlined, false, _emailController),
+                  textField('Введите емайл', Icons.person_outlined, false,
+                      _emailController),
                   SizedBox(
                     height: 20,
                   ),
-                  textField(
-                      'Введите пароль', Icons.lock_outlined, false, _passwordController),
+                  textField('Введите пароль', Icons.lock_outlined, true,
+                            _passwordController),
                   SizedBox(
                     height: 20,
                   ),
@@ -64,8 +76,8 @@ class _AuthorizationScreenState extends State<AuthorizationScreen> {
                         ),
                       ),
                       SizedBox(
-                    width: 5,
-                  ),
+                        width: 5,
+                      ),
                       GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -80,58 +92,84 @@ class _AuthorizationScreenState extends State<AuthorizationScreen> {
                                 fontWeight: FontWeight.bold),
                           )),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
           ),
         ),
       ),
-      floatingActionButton: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        width: double.maxFinite,
+      floatingActionButton: AnimatedContainer(
+        height: 60,
+        width: isKeyboar ? 60 : getWidth(context),
+        margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16,
+            right: 16),
         decoration:
             BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(16))),
-        child: AnimatedContainer(
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          height: 60,
-          width: isKeyboar ? 60 : 400,
-          duration: Duration(milliseconds: 800),
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                primary: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    isKeyboar ? 190 : 30,
-                  ),
-                )),
-            onPressed: () {
-              FirebaseAuth.instance
-                  .signInWithEmailAndPassword(
-                      email: _emailController.text,
-                      password: _passwordController.text)
-                  .then((value) => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => BottomNavigatorScreen()))
-                      .onError(
-                          (error, stackTrace) => print('${error.toString()}')));
-            },
-            child: isKeyboar
-                ? Container(
-                    child: Icon(
-                      Icons.arrow_forward,
-                    ),
-                  )
-                : Container(
-                    child: Text(
-                      "Войти",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-          ),
+        duration: Duration(milliseconds: 800),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+              primary: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(
+                  isKeyboar ? 190 : 30,
+                ),
+              )),
+          onPressed: () {
+            if (_emailController.text.isEmpty ||
+                _passwordController.text.isEmpty) {
+              showErrorSnackBar('Поле не должно быть пустным');
+            } else if (_passwordController.text.length < 6) {
+              showErrorSnackBar('Пароль должен содержать минимум 6 символов');
+            } else {
+              try {
+                setState(() {
+                  _isLoading = true;
+                });
+                FirebaseAuth.instance
+                    .signInWithEmailAndPassword(
+                        email: _emailController.text,
+                        password: _passwordController.text)
+                    .then((value) => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                BottomNavigatorScreen())).onError(
+                        (error, stackTrace) => print('${error.toString()}')));
+                setState(() {
+                  _isLoading = false;
+                });
+                showSuccessSnackBar('Добро пожаловать');
+              } on FirebaseAuthException catch (e) {
+                setState(() {
+                  _isLoading = false;
+                });
+                if (e.code == 'user-not-found') {
+                  showErrorSnackBar('Не верный email ${e.code}');
+                } else if (e.code == 'wrong-password') {
+                  showErrorSnackBar('Не верный пароль ${e.code}');
+                }
+              }
+            }
+          },
+          child: _isLoading == true
+              ? CircularProgressIndicator()
+              : isKeyboar
+                  ? Container(
+                      child: Icon(
+                        Icons.arrow_forward,
+                      ),
+                    )
+                  : _isLoading == true
+                      ? CircularProgressIndicator()
+                      : Container(
+                          child: Text(
+                            "Войти",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

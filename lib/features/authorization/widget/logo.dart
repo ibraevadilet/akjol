@@ -8,7 +8,7 @@ class Logo extends StatelessWidget {
         height: 150,
         width: 150,
         margin: EdgeInsets.only(top: 75),
-        child: Image.asset("assets/images/whele.png"),
+        child: Image.asset("assets/images/wheel.png"),
       ),
     );
   }

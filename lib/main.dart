@@ -1,13 +1,13 @@
-
 import 'package:akjol/features/authorization/screens/signin_screen.dart';
 import 'package:akjol/firebase_options.dart';
-//import 'package:akjol/widgets/buttom_navigator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:animated_splash_screen/animated_splash_screen.dart';
+
 final scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
 void main() async {
- WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -26,7 +26,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: AuthorizationScreen(),//const BottomNavigatorScreen(),
+      home: AnimatedSplashScreen(
+        splash: 'assets/images/wheel.png',
+        nextScreen: AuthorizationScreen(),
+        splashIconSize: 150,
+        splashTransition: SplashTransition.slideTransition,
+      ), 
     );
   }
 }

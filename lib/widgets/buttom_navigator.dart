@@ -1,8 +1,8 @@
 import 'package:akjol/features/home/home_screen.dart';
 import 'package:akjol/features/profile/profile_screen.dart';
 import 'package:akjol/helpers/app_colors.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 
 class BottomNavigatorScreen extends StatefulWidget {
   const BottomNavigatorScreen({Key? key}) : super(key: key);
@@ -12,40 +12,57 @@ class BottomNavigatorScreen extends StatefulWidget {
 }
 
 class _BottomNavigatorState extends State<BottomNavigatorScreen> {
-  // int index = 0;
-  int _page = 0;
-  GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
+  int _selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: pages[_page],
-      bottomNavigationBar: 
-      
-      CurvedNavigationBar(
-          key: _bottomNavigationKey,
-          index: 0,
-          height: 60.0,
-          items: <Widget>[
-            Icon(Icons.add, size: 30),
-            Icon(Icons.list, size: 30),
-            Icon(Icons.compare_arrows, size: 30),
-            Icon(Icons.call_split, size: 30),
-            Icon(Icons.perm_identity, size: 30),
-          ],
+      body: pages[_selectedIndex],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
           color: Colors.white,
-          buttonBackgroundColor: Colors.white,
-          backgroundColor: Colors.blueAccent,
-          animationCurve: Curves.easeInOut,
-          animationDuration: Duration(milliseconds: 600),
-          onTap: (index) {
-            setState(() {
-             _page = index;
-            });
-          },
-          letIndexChange: (index) => true,
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 20,
+              color: Colors.black.withOpacity(.1),
+            )
+          ],
         ),
-      
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+            child: GNav(
+              rippleColor: Color.fromARGB(255, 172, 166, 255),
+              hoverColor: Color.fromARGB(255, 166, 167, 255),
+              tabBackgroundColor: Color.fromARGB(255, 166, 167, 255),
+              gap: 8,
+              activeColor: Colors.black87,
+              iconSize: 24,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              duration: Duration(milliseconds: 400),
+              color: Colors.black54,
+              tabs: [
+                GButton(
+                  icon: Icons.map_outlined,
+                  text: 'Карта',
+                ),
+                GButton(
+                  icon: Icons.person_outlined,
+                  text: 'Профиль',
+                ),
+              ],
+              selectedIndex: _selectedIndex,
+              onTabChange: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+
       // ClipRRect(
       //   borderRadius: const BorderRadius.only(
       //     topLeft: Radius.circular(0),
@@ -98,7 +115,6 @@ class _BottomNavigatorState extends State<BottomNavigatorScreen> {
       //     ],
       //   ),
       // ),
-    
     );
   }
 }
